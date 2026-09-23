@@ -1,0 +1,152 @@
+<!-- Created by Erion Nezha — © 2026 All rights reserved -->
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lifestyle Store — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f5f6fa;color:#2f3640}
+header{background:#273c75;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:1.25rem}
+header h1 span{color:#fbc531}
+.cartbtn{background:#fbc531;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem;color:#273c75}
+.sim{background:#fff3cd;border-bottom:2px solid #fbc531;padding:10px 20px;font-size:.85rem;color:#856404;text-align:center}
+.cats{display:flex;gap:8px;justify-content:center;padding:16px;flex-wrap:wrap}
+.cats button{background:#fff;border:1px solid #dcdde1;padding:8px 18px;border-radius:20px;cursor:pointer;font-size:.88rem}
+.cats button.active{background:#273c75;color:#fff;border-color:#273c75}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;padding:0 20px 40px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px #0001;display:flex;flex-direction:column}
+.thumb{height:150px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,#dfe6f5,#f5f6fa)}
+.card .body{padding:14px;flex:1;display:flex;flex-direction:column}
+.card h3{font-size:.95rem;margin-bottom:4px}
+.card .cat{font-size:.75rem;color:#7f8fa6;text-transform:uppercase;letter-spacing:.5px}
+.card .price{color:#0097e6;font-weight:800;font-size:1.05rem;margin:8px 0}
+.card button{margin-top:auto;background:#273c75;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600}
+.card button:hover{background:#192a56}
+.drawer{position:fixed;top:0;right:-380px;width:360px;max-width:92vw;height:100vh;background:#fff;box-shadow:-4px 0 20px #0003;transition:.3s;z-index:10;display:flex;flex-direction:column}
+.drawer.open{right:0}
+.drawer h2{padding:16px;border-bottom:1px solid #eee;font-size:1.05rem}
+.items{flex:1;overflow-y:auto;padding:10px 16px}
+.ci{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f2f6}
+.ci .n{flex:1;font-size:.88rem}
+.ci .p{font-weight:700;color:#0097e6;font-size:.85rem;white-space:nowrap}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{background:#f1f2f6;border:none;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700}
+.rm{background:none;border:none;color:#e84118;cursor:pointer;font-size:1rem}
+.dfoot{padding:16px;border-top:1px solid #eee}
+.dfoot .tot{font-size:1.1rem;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between}
+.dfoot button{width:100%;background:#44bd32;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.95rem}
+.overlay{position:fixed;inset:0;background:#0006;display:none;z-index:9}
+.overlay.show{display:block}
+.checkout{max-width:440px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;display:none}
+.checkout.show{display:block}
+.checkout h2{margin-bottom:14px}
+.checkout input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #dcdde1;border-radius:8px}
+.checkout button{background:#44bd32;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;cursor:pointer;width:100%}
+.success{text-align:center;padding:40px 20px;display:none;max-width:440px;margin:0 auto;background:#fff;border-radius:12px}
+.success .ok{font-size:3rem}
+footer{text-align:center;padding:16px;color:#7f8fa6;font-size:.82rem}
+.view{display:none}.view.active{display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>🛒 <span>Lifestyle</span> Store</h1>
+<button class="cartbtn" onclick="toggleCart()">🛍️ Shporta (<span id="count">0</span>)</button>
+</header>
+<div class="sim">⚠️ <strong>SIMULIM</strong> — origjinali është sajt PHP + MySQL (nuk ekzekutohet në GitHub Pages). Produktet dhe çmimet janë reale, nga databaza <code>storesss.sql</code>.</div>
+
+<div id="v-shop" class="view active">
+<div class="cats" id="cats"></div>
+<div class="grid" id="grid"></div>
+</div>
+
+<div id="v-checkout" class="view">
+<div style="padding:20px"><div class="checkout show" id="coform">
+<h2>💳 Checkout</h2>
+<input id="nm" placeholder="Emri i plotë">
+<input id="em" placeholder="Email">
+<input id="ad" placeholder="Adresa">
+<button onclick="placeOrder()">Konfirmo porosinë</button>
+<button onclick="showView('v-shop')" style="background:#7f8fa6;margin-top:8px">← Kthehu</button>
+</div>
+<div class="success" id="cosuccess">
+<div class="ok">✅</div>
+<h2>Faleminderit!</h2>
+<p id="omsg" style="margin:12px 0;color:#57606f"></p>
+<button onclick="showView('v-shop')" style="background:#273c75;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;cursor:pointer">Vazhdo blerjet</button>
+</div></div>
+</div>
+
+<div class="overlay" id="ov" onclick="toggleCart()"></div>
+<aside class="drawer" id="drawer">
+<h2>🛍️ Shporta</h2>
+<div class="items" id="citems"></div>
+<div class="dfoot">
+<div class="tot"><span>Totali:</span><span id="total">Rs 0</span></div>
+<button onclick="goCheckout()">Vazhdo te pagesa →</button>
+</div>
+</aside>
+
+<footer>Krijuar nga <strong>Erion Nezha</strong> — © 2026</footer>
+<script>
+const PRODUCTS=[
+{id:1,name:"Canon EOS",price:36000,cat:"Kamera",icon:"📷"},
+{id:2,name:"Nikon DSLR",price:40000,cat:"Kamera",icon:"📷"},
+{id:3,name:"Sony DSLR",price:45000,cat:"Kamera",icon:"📷"},
+{id:4,name:"Olympus DSLR",price:50000,cat:"Kamera",icon:"📷"},
+{id:5,name:"Titan Model #301",price:13000,cat:"Ora",icon:"⌚"},
+{id:6,name:"Titan Model #201",price:3000,cat:"Ora",icon:"⌚"},
+{id:7,name:"HMT Milan",price:8000,cat:"Ora",icon:"⌚"},
+{id:8,name:"Faber Luba #111",price:18000,cat:"Ora",icon:"⌚"},
+{id:9,name:"H&W",price:800,cat:"Këmisha",icon:"👕"},
+{id:10,name:"Luis Phil",price:1000,cat:"Këmisha",icon:"👕"},
+{id:11,name:"John Zok",price:1500,cat:"Këmisha",icon:"👕"},
+{id:12,name:"Jhalsani",price:1300,cat:"Këmisha",icon:"👕"}];
+const CATS=["Të gjitha","Kamera","Ora","Këmisha"];
+let cart={},filter="Të gjitha";
+const fmt=n=>"Rs "+n.toLocaleString("en-US");
+function renderCats(){document.getElementById('cats').innerHTML=CATS.map(c=>`<button class="${c===filter?'active':''}" onclick="setF('${c}')">${c}</button>`).join('');}
+function setF(c){filter=c;renderCats();renderGrid();}
+function renderGrid(){
+  const list=PRODUCTS.filter(p=>filter==="Të gjitha"||p.cat===filter);
+  document.getElementById('grid').innerHTML=list.map(p=>`
+  <div class="card"><div class="thumb">${p.icon}</div>
+  <div class="body"><span class="cat">${p.cat}</span><h3>${p.name}</h3>
+  <div class="price">${fmt(p.price)}</div>
+  <button onclick="add(${p.id})">Shto në shportë</button></div></div>`).join('');
+}
+function add(id){cart[id]=(cart[id]||0)+1;renderCart();}
+function chq(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];renderCart();}
+function rm(id){delete cart[id];renderCart();}
+function cartCount(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function cartTotal(){return Object.entries(cart).reduce((a,[id,q])=>a+PRODUCTS.find(p=>p.id==id).price*q,0);}
+function renderCart(){
+  document.getElementById('count').textContent=cartCount();
+  const box=document.getElementById('citems');
+  const ids=Object.keys(cart);
+  box.innerHTML=ids.length?ids.map(id=>{const p=PRODUCTS.find(x=>x.id==id);const q=cart[id];return `
+  <div class="ci"><div class="n">${p.icon} ${p.name}</div>
+  <div class="qty"><button onclick="chq(${id},-1)">−</button><span>${q}</span><button onclick="chq(${id},1)">+</button></div>
+  <div class="p">${fmt(p.price*q)}</div><button class="rm" onclick="rm(${id})">🗑️</button></div>`;}).join('')
+  :'<p style="color:#a4b0be;text-align:center;padding:30px">Shporta është bosh.</p>';
+  document.getElementById('total').textContent=fmt(cartTotal());
+}
+function toggleCart(){document.getElementById('drawer').classList.toggle('open');document.getElementById('ov').classList.toggle('show');}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(v).classList.add('active');window.scrollTo(0,0);}
+function goCheckout(){if(!cartCount()){alert('Shporta është bosh!');return;}toggleCart();document.getElementById('coform').classList.add('show');document.getElementById('cosuccess').style.display='none';showView('v-checkout');}
+function placeOrder(){
+  const nm=document.getElementById('nm').value.trim();
+  if(!nm){alert('Shkruaj emrin!');return;}
+  const n=cartCount(),t=fmt(cartTotal());
+  document.getElementById('omsg').textContent=`Porosia me ${n} artikuj (${t}) u regjistrua për ${nm}. (Demo — pa pagesë reale.)`;
+  document.getElementById('coform').classList.remove('show');
+  document.getElementById('cosuccess').style.display='block';
+  cart={};renderCart();
+}
+renderCats();renderGrid();renderCart();
+</script>
+</body>
+</html>
